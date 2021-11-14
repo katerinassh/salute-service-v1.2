@@ -1,0 +1,108 @@
+openapi: 3.1.0
+info:
+  title: Auth Service
+  description: | 
+              This microservice is responsible for in-app authentication operations (login, registration and etc).
+  version: 1.0.0
+paths: 
+  /auth/login:
+    post:
+      summary: Login user into the system
+      description: With login and password returns access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                login:
+                  type: string
+                password:
+                  type: string
+      responses: 
+        '200':
+          description: x-auth-token
+          content:
+            application/json:
+              schema:
+                type: string
+                example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMDVlZDJhMGItMjRhYS00NTRhLWJlM2EtMjBiNmVkYzJiMjE4IiwiZW1haWwiOiJ2YWxlcmlpYWRpZHljaEBnbWFpbC5jb20iLCJsb2dpbiI6InZhbGVyaWlpYWQiLCJiaXJ0aGRheSI6IjIwMDItMDctMTRUMjE6MDA6MDAuMDAwWiIsInBob3RvX2lkIjozLCJjcmVhdGVkX2F0IjoiMjAyMS0xMS0wNVQxMzoxMzo0NC4wMDNaIiwidXNlcl9udW1iZXIiOjMsImlhdCI6MTYzNjI4ODkyOX0.udfA_xwHPPL8_f8H9ieEUfKW6G4Gx78obcB76QjXlEQ
+        '404':
+          description: login or password is incorrect
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Login is incorrect
+
+  /auth/forgotpass:
+    post:
+      summary: Forgot password
+      description: Send a link to email for reseting password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+      responses: 
+        '200':
+          description: OK, link has been sent
+        '400':
+          description: something went wrong
+          content:
+            application/json:
+              schema:
+                type: string
+                example: User with such email doesn`t exist
+
+  /auth/resetpass:
+    post:
+      summary: Reset password
+      description: With a link from email update password
+      parameters:
+        - in: path
+          name: token
+          required: true
+          description: genereted token with /auth/resetpass endpoint
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                newPassword:
+                  type: string
+                newPasswordAgain:
+                  type: string
+      responses: 
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Password was successfully changed
+        '400':
+          description: request body is not valid
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Not all fields are filled, Password mismatch      
+        '404':
+          description: access token expired
+          content:
+            application/json:
+              schema:
+                type: string
+                example: jwt expired
+
+

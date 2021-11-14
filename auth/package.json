@@ -1,0 +1,36 @@
+{
+  "name": "auth",
+  "version": "1.0.0",
+  "description": "Auth service",
+  "main": "server.js",
+  "scripts": {
+    "start": "node ./server.js",
+    "start:dev": "nodemon ./server.js",
+    "lint": "eslint src --ext .js",
+    "lint:fix": "npm run lint -- --fix",
+    "migration:up": "migrate-mongo up -f './db/migrate-mongo-config.js'",
+    "migration:down": "migrate-mongo down -f './db/migrate-mongo-config.js'",
+    "migration:status": "migrate-mongo status -f './db/migrate-mongo-config.js'",
+    "migration:create": "migrate-mongo create -f './db/migrate-mongo-config.js'",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "@katerinassh",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.24.0",
+    "bcrypt": "^5.0.1",
+    "body-parser": "^1.19.0",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "migrate-mongo": "^8.2.3",
+    "mongoose": "^6.0.12",
+    "nodemailer": "^6.7.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.25.2",
+    "nodemon": "^2.0.14"
+  }
+}

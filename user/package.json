@@ -1,0 +1,38 @@
+{
+  "name": "user",
+  "version": "1.0.0",
+  "description": "user service",
+  "main": "app.js",
+  "scripts": {
+    "start": "node ./server.js",
+    "start:dev": "nodemon ./server.js",
+    "migrate": "knex migrate:latest --knexfile db/knexfile.js",
+    "migrate:up": "knex migrate:up --knexfile db/knexfile.js",
+    "migrate:down": "knex migrate:down --knexfile db/knexfile.js",
+    "migrate:make": "knex migrate:make --knexfile db/knexfile.js",
+    "migrate:rollback": "knex migrate:rollback --knexfile db/knexfile.js",
+    "lint": "eslint src --ext .js",
+    "lint:fix": "npm run lint -- --fix",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "@katerinassh",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.24.0",
+    "bcrypt": "^5.0.1",
+    "body-parser": "^1.19.0",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "knex": "^0.21.21",
+    "nodemailer": "^6.7.0",
+    "objection": "^2.2.17",
+    "pg": "^8.7.1"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.25.2",
+    "nodemon": "^2.0.14"
+  }
+}

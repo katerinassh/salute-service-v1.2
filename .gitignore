@@ -1,0 +1,8 @@
+/auth/node_modules/
+/auth/.env
+
+/photo/node_modules/
+/photo/.env
+
+/user/node_modules/
+/user/.env
