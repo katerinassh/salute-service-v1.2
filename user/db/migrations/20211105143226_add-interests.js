@@ -7,4 +7,3 @@ exports.up = function (knex) {
     return knex('interests')
       .where({ name: 'Hanging out' } || { name: 'Faith' } || { name: 'Entertainment' } || { name: 'Languages' } || { name: 'AI' } || { name: 'Sport' } || { name: 'Art' }).del();
   };
-  

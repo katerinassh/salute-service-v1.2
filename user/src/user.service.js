@@ -1,9 +1,15 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable camelcase */
 /* eslint-disable max-len */
 const axios = require('axios');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
 const User = require('./models/user.model');
+const { getInterestsNumbers, getUsersWithMatchedInterests } = require('./interest.service');
+const { calculateDistance } = require('./helpers/lib');
+
+const distanceDefault = 30000;
 
 async function isUserExists(email) {
   const users = await User.query().where('users.email', email);
@@ -128,6 +134,32 @@ async function activate(user_id) {
   });
 }
 
+async function getMatchedPeople(user) {
+  let response = await axios.get(`${process.env.AUTH_URL}/auth/log?user_number=${user.user_number}`);
+  const { entrances } = response.data;
+  const { geo } = entrances[entrances.length - 1];
+
+  const interestsIds = await getInterestsNumbers(user.user_number);
+  const matchedUsers = await getUsersWithMatchedInterests(interestsIds, user.user_number);
+
+  for (const matchedUser of matchedUsers) {
+    response = await axios.get(`${process.env.AUTH_URL}/auth/log?user_number=${matchedUser.user_number}`);
+    const { data } = response;
+    const anotherGeo = data.entrances[data.entrances.length - 1].geo;
+
+    matchedUser.distance = calculateDistance(geo[0], geo[1], anotherGeo[0], anotherGeo[1]);
+    if (matchedUser.distance > distanceDefault) {
+      const index = matchedUsers.indexOf(matchedUser);
+      matchedUsers.splice(index, 1);
+    }
+  }
+
+  return matchedUsers;
+  // *** сортировка полученого массива ***
+  // сначала 1 приоритет - количество общих интересов = сортируем весь список по полю количеству общих интересов
+  // расстояние - внутри каждого количества общих интересов нужно провести сортировку от мин расстояния до макс
+}
+
 module.exports = {
   getUserByLogin,
   getUserByEmail,
@@ -141,4 +173,5 @@ module.exports = {
   updatePhoto,
   invite,
   activate,
+  getMatchedPeople,
 };

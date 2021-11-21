@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable camelcase */
 require('dotenv').config();
@@ -29,4 +30,29 @@ async function updateInterests(body) {
   return UserInterest.query().where('user_interest.user_id', user.user_number);
 }
 
-module.exports = { updateInterests };
+async function getInterestsNumbers(user_number) {
+  const interestsIds = await UserInterest.query().where('user_id', user_number).select('interest_id');
+  return interestsIds.map((elem) => elem.interest_id);
+}
+
+async function getUsersWithMatchedInterests(interestsIds, user_number) {
+  const users = [];
+  for (const interest_number of interestsIds) {
+    const records = await UserInterest.query().where('interest_id', interest_number);
+
+    for (const record of records) {
+      if (record.user_id !== user_number) {
+        const elem = users.find((user) => user.user_number === record.user_id);
+        if (!elem) {
+          users.push({ user_number: record.user_id, commonCount: 1 });
+        } else {
+          elem.commonCount += 1;
+        }
+      }
+    }
+  }
+
+  return users;
+}
+
+module.exports = { updateInterests, getInterestsNumbers, getUsersWithMatchedInterests };
