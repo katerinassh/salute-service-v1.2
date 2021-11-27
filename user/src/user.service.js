@@ -1,13 +1,12 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable camelcase */
-/* eslint-disable max-len */
 const axios = require('axios');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
 const User = require('./models/user.model');
-const { getInterestsNumbers, getUsersWithMatchedInterests } = require('./interest.service');
-const { calculateDistance } = require('./helpers/lib');
+const { getInterestsNumbers, getInterestsInfo, getUsersWithMatchedInterests } = require('./interest.service');
+const { calculateDistance, sortByInterestAndDistance } = require('./helpers/lib');
 
 const distanceDefault = 30000;
 
@@ -134,6 +133,25 @@ async function activate(user_id) {
   });
 }
 
+async function formMatchedPeopleList(sortedMatchedInfo) {
+  const result = [];
+  for (const element of sortedMatchedInfo) {
+    const person = await User.query().where('users.user_number', element.user_number).first();
+
+    const interestsIds = await getInterestsNumbers(element.user_number);
+    const interests = await getInterestsInfo(interestsIds);
+    const ineterestsNames = interests.map((interest) => interest.name);
+
+    result.push({
+      name: person.name,
+      interests: ineterestsNames,
+      distance: element.distance,
+    });
+  }
+
+  return result;
+}
+
 async function getMatchedPeople(user) {
   let response = await axios.get(`${process.env.AUTH_URL}/auth/log?user_number=${user.user_number}`);
   const { entrances } = response.data;
@@ -154,10 +172,8 @@ async function getMatchedPeople(user) {
     }
   }
 
-  return matchedUsers;
-  // *** сортировка полученого массива ***
-  // сначала 1 приоритет - количество общих интересов = сортируем весь список по полю количеству общих интересов
-  // расстояние - внутри каждого количества общих интересов нужно провести сортировку от мин расстояния до макс
+  const sorted = sortByInterestAndDistance(matchedUsers, interestsIds.length);
+  return formMatchedPeopleList(sorted);
 }
 
 module.exports = {

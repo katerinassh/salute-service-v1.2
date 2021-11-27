@@ -1,5 +1,10 @@
 const mongoose = require('mongoose');
 
+const EntrancesSchema = new mongoose.Schema({
+  time: { type: Date, default: new Date() },
+  geo: { type: [Number, Number], default: [] },
+});
+
 const logSchema = new mongoose.Schema(
   {
     user_number: {
@@ -7,7 +12,7 @@ const logSchema = new mongoose.Schema(
       unique: true,
       required: true,
     },
-    entrances: [Date],
+    entrances: [EntrancesSchema],
   },
   { timestamps: true },
 );

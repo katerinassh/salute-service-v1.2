@@ -30,6 +30,16 @@ async function updateInterests(body) {
   return UserInterest.query().where('user_interest.user_id', user.user_number);
 }
 
+async function getInterestsInfo(interestIds) {
+  const interests = [];
+  for (const number of interestIds) {
+    const interest = await Interest.query().where('interest_number', number).first();
+    interests.push(interest);
+  }
+
+  return interests;
+}
+
 async function getInterestsNumbers(user_number) {
   const interestsIds = await UserInterest.query().where('user_id', user_number).select('interest_id');
   return interestsIds.map((elem) => elem.interest_id);
@@ -55,4 +65,6 @@ async function getUsersWithMatchedInterests(interestsIds, user_number) {
   return users;
 }
 
-module.exports = { updateInterests, getInterestsNumbers, getUsersWithMatchedInterests };
+module.exports = {
+  updateInterests, getInterestsInfo, getInterestsNumbers, getUsersWithMatchedInterests,
+};
