@@ -8,7 +8,7 @@ require('dotenv').config();
 
 const { Log } = models;
 
-async function logIn(body) {
+async function logIn(geo, body) {
   /* eslint-disable no-shadow */
   const { login, password } = body;
 
@@ -24,11 +24,12 @@ async function logIn(body) {
     const {
       user_id, email, birthday, photo_id, created_at, updated_at, user_number,
     } = data.user;
-
     const log = await Log.findOne({ user_number });
+
+    const newEntrance = { time: new Date(), geo };
     await Log.updateOne({ user_number }, {
       $set: {
-        entrances: [...log.entrances, new Date()],
+        entrances: [...log.entrances, newEntrance],
       },
     });
 
@@ -47,7 +48,7 @@ async function logIn(body) {
   throw new Error('Password is incorrect');
 }
 
-async function register(user_id, body) {
+async function register(user_id, geo, body) {
   const {
     name, login, password, passwordAgain, birthday, photo_link, interests,
   } = body;
@@ -74,9 +75,10 @@ async function register(user_id, body) {
   const result = await axios.put(`${process.env.USER_URL}/user/activate`, { user_id });
   const { user_number } = result.data;
 
-  await Log.create({ user_number, entrances: [new Date()] });
+  const entrance = { time: new Date(), geo };
+  await Log.create({ user_number, entrances: [entrance] });
 
-  const token = await logIn({ login, password });
+  const token = await logIn(geo, { login, password });
   return token;
 }
 
@@ -101,6 +103,10 @@ async function resetPassword(token, body) {
   await axios.put(`${process.env.USER_URL}/user/updatePassword`, body);
 }
 
+async function getLogByUserNumber(user_number) {
+  return Log.findOne({ user_number });
+}
+
 module.exports = {
-  logIn, forgotPassword, resetPassword, register,
+  logIn, forgotPassword, resetPassword, register, getLogByUserNumber,
 };

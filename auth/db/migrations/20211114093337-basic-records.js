@@ -2,19 +2,28 @@ module.exports = {
   async up(db) {
     await db.collection('logs').insertMany([{
       user_number: 1,
-      entrances: [new Date()],
+      entrances: [{
+        time: new Date(),
+        geo: [50.4333, 30.5167],
+      }],
       createdAt: new Date(),
       updatedAt: new Date(),
     },
     {
       user_number: 2,
-      entrances: [new Date()],
+      entrances: [{
+        time: new Date(),
+        geo: [50.4547, 30.5238],
+      }],
       createdAt: new Date(),
       updatedAt: new Date(),
     },
     {
       user_number: 3,
-      entrances: [new Date()],
+      entrances: [{
+        time: new Date(),
+        geo: [50.4547, 30.5238],
+      }],
       createdAt: new Date(),
       updatedAt: new Date(),
     }]);
