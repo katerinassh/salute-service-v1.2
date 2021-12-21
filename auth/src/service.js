@@ -14,7 +14,7 @@ async function logIn(geo, body) {
 
   const response = await axios.get(`${process.env.USER_URL}/user?login=${login}`);
   const { data } = response;
-  if (!data) {
+  if (Object.keys(data).length === 0) {
     throw new Error('Login is incorrect');
   }
 

@@ -16,7 +16,7 @@ router.post('/login', getGeo, async (req, res) => {
 
 router.post('/register', getGeo, async (req, res) => {
   try {
-    res.status(200).send(await register(req.query.id, req.body));
+    res.status(200).send(await register(req.query.id, req.geo, req.body));
   } catch (err) {
     res.status(404).send(err.message);
   }
