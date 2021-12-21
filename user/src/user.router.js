@@ -58,7 +58,8 @@ userRouter.post('/invite', authenticate, async (req, res) => {
 
   try {
     const link = await invite(req.body, req.user);
-    res.status(200).send(await mailInvite(email, link));
+    await mailInvite(email, link);
+    res.status(200).send(link);
   } catch (err) {
     res.status(400).send(err.message);
   }
