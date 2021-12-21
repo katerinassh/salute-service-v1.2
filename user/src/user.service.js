@@ -1,9 +1,14 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable camelcase */
-/* eslint-disable max-len */
 const axios = require('axios');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
 const User = require('./models/user.model');
+const { getInterestsNumbers, getInterestsInfo, getUsersWithMatchedInterests } = require('./interest.service');
+const { calculateDistance, sortByInterestAndDistance } = require('./helpers/lib');
+
+const distanceDefault = 30000;
 
 async function isUserExists(email) {
   const users = await User.query().where('users.email', email);
@@ -128,6 +133,49 @@ async function activate(user_id) {
   });
 }
 
+async function formMatchedPeopleList(sortedMatchedInfo) {
+  const result = [];
+  for (const element of sortedMatchedInfo) {
+    const person = await User.query().where('users.user_number', element.user_number).first();
+
+    const interestsIds = await getInterestsNumbers(element.user_number);
+    const interests = await getInterestsInfo(interestsIds);
+    const ineterestsNames = interests.map((interest) => interest.name);
+
+    result.push({
+      name: person.name,
+      interests: ineterestsNames,
+      distance: element.distance,
+    });
+  }
+
+  return result;
+}
+
+async function getMatchedPeople(user) {
+  let response = await axios.get(`${process.env.AUTH_URL}/auth/log?user_number=${user.user_number}`);
+  const { entrances } = response.data;
+  const { geo } = entrances[entrances.length - 1];
+
+  const interestsIds = await getInterestsNumbers(user.user_number);
+  const matchedUsers = await getUsersWithMatchedInterests(interestsIds, user.user_number);
+
+  for (const matchedUser of matchedUsers) {
+    response = await axios.get(`${process.env.AUTH_URL}/auth/log?user_number=${matchedUser.user_number}`);
+    const { data } = response;
+    const anotherGeo = data.entrances[data.entrances.length - 1].geo;
+
+    matchedUser.distance = calculateDistance(geo[0], geo[1], anotherGeo[0], anotherGeo[1]);
+    if (matchedUser.distance > distanceDefault) {
+      const index = matchedUsers.indexOf(matchedUser);
+      matchedUsers.splice(index, 1);
+    }
+  }
+
+  const sorted = sortByInterestAndDistance(matchedUsers, interestsIds.length);
+  return formMatchedPeopleList(sorted);
+}
+
 module.exports = {
   getUserByLogin,
   getUserByEmail,
@@ -141,4 +189,5 @@ module.exports = {
   updatePhoto,
   invite,
   activate,
+  getMatchedPeople,
 };

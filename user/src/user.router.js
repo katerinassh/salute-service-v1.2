@@ -12,6 +12,7 @@ const {
   isCurrentPasswordCorrect,
   invite,
   activate,
+  getMatchedPeople,
 } = require('./user.service');
 
 const userRouter = express.Router();
@@ -57,7 +58,8 @@ userRouter.post('/invite', authenticate, async (req, res) => {
 
   try {
     const link = await invite(req.body, req.user);
-    res.status(200).send(await mailInvite(email, link));
+    await mailInvite(email, link);
+    res.status(200).send(link);
   } catch (err) {
     res.status(400).send(err.message);
   }
@@ -110,6 +112,15 @@ userRouter.get('/', async (req, res) => {
   }
 
   res.status(200).send(user);
+});
+
+userRouter.get('/people', authenticate, async (req, res) => {
+  try {
+    const listOfPeople = await getMatchedPeople(req.user);
+    res.status(200).send(listOfPeople);
+  } catch (err) {
+    res.status(400).send(err.message);
+  }
 });
 
 module.exports = { userRouter };
